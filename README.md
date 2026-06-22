@@ -1,58 +1,181 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Projet Laravel 12 - Mini boutique (Catalogue + Panier)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Description
 
-## About Laravel
+Ce projet est une application Laravel 12 simple de type e-commerce.  
+Il permet de gérer des produits, un panier utilisateur basé sur la session et prépare la structure pour une future intégration de paiement.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Technologies utilisées
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Laravel 12
+- SQLite
+- Blade (templates)
+- Eloquent ORM
+- Sessions Laravel (panier)
+- Bootstrap (optionnel / futur ajout)
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Fonctionnalités
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Produits
+- Création de produits
+- Modification de produits
+- Suppression de produits
+- Affichage de la liste des produits
+- Upload d’image produit (stockée dans `storage`)
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+### Catalogue (page d’accueil)
+- Affichage de tous les produits
+- Accès rapide aux actions :
+  - Ajouter au panier
+  - Modifier produit
+  - Supprimer produit
+- Lien vers création de produit
 
-## Agentic Development
+### Panier (session)
+- Ajouter un produit au panier
+- Incrémenter la quantité si déjà existant
+- Afficher le contenu du panier
+- Supprimer un produit du panier
+- Calcul du total
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+---
+
+## Base de données
+
+### Table `products`
+- id
+- name
+- description
+- price
+- image
+- created_at
+- updated_at
+
+### Table `orders`
+- id
+- customer_name
+- customer_email
+- total_amount
+- payment_status
+- transaction_id
+- created_at
+- updated_at
+
+### Table `order_items`
+- id
+- order_id
+- product_id
+- quantity
+- price
+- created_at
+- updated_at
+
+---
+
+## Relations Eloquent
+
+- Product → hasMany(OrderItem)
+- Order → hasMany(OrderItem)
+- OrderItem → belongsTo(Product)
+- OrderItem → belongsTo(Order)
+
+---
+
+## Seeder
+
+Le projet contient un seeder permettant de générer automatiquement 10 produits de test :
 
 ```bash
-composer require laravel/boost --dev
+php artisan db:seed
+````
 
-php artisan boost:install
+Ou :
+
+```bash
+php artisan migrate:fresh --seed
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+---
 
-## Contributing
+## Routes principales
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Produits
 
-## Code of Conduct
+* GET `/` → Liste des produits
+* GET `/products/create` → Formulaire création
+* POST `/products` → Enregistrer produit
+* GET `/products/{id}/edit` → Modifier produit
+* PUT `/products/{id}` → Update produit
+* DELETE `/products/{id}` → Supprimer produit
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Panier
 
-## Security Vulnerabilities
+* GET `/cart` → Voir panier
+* GET `/cart/add/{id}` → Ajouter produit
+* GET `/cart/remove/{id}` → Retirer produit
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## Stockage des images
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Les images sont stockées dans :
+
+```
+storage/app/public/products
+```
+
+Lien symbolique requis :
+
+```bash
+php artisan storage:link
+```
+
+---
+
+## Structure globale du projet
+
+```
+app/
+ ├── Http/Controllers
+ │    ├── ProductController
+ │    ├── CartController
+ │
+ ├── Models
+ │    ├── Product
+ │    ├── Order
+ │    ├── OrderItem
+```
+
+---
+
+## Objectif pédagogique
+
+Ce projet sert de base pour :
+
+* Comprendre Laravel CRUD
+* Gérer une session panier
+* Manipuler Eloquent relations
+* Préparer un système de paiement (future étape)
+
+---
+
+## Améliorations futures
+
+* Système de paiement (Stripe / CinetPay / Fedapay)
+* Authentification utilisateur
+* Historique des commandes
+* Dashboard admin
+* Design UI amélioré (Bootstrap / Tailwind)
+
+---
+
+## Auteur
+
+Projet développé dans un but pédagogique pour l’apprentissage de Laravel et des systèmes e-commerce simples.
+
+```
+```
