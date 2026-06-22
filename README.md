@@ -1,102 +1,205 @@
-# Projet Laravel 12 - Mini boutique (Catalogue + Panier)
+# Laravel 12 - Mini Boutique (Catalogue + Panier + Paiement Fedapay Sandbox)
+
+## Auteurs
+- TOYI François  
+- BATAYA Crépin  
+
+---
 
 ## Description
 
-Ce projet est une application Laravel 12 simple de type e-commerce.  
-Il permet de gérer des produits, un panier utilisateur basé sur la session et prépare la structure pour une future intégration de paiement.
+Application e-commerce simple développée avec Laravel 12.  
+Le projet permet de gérer un catalogue de produits, un panier utilisateur basé sur session, la création de commandes et l’intégration d’un paiement en ligne via **Fedapay (sandbox)**.
+
+Objectif principal : démonstration pédagogique du flux complet e-commerce + paiement externe.
 
 ---
 
 ## Technologies utilisées
 
 - Laravel 12
+- PHP 8+
 - SQLite
-- Blade (templates)
+- Blade (templating)
 - Eloquent ORM
-- Sessions Laravel (panier)
-- Bootstrap (optionnel / futur ajout)
+- Session Laravel (panier)
+- Fedapay API (sandbox)
 
 ---
 
 ## Fonctionnalités
 
-### Produits
+### 1. Gestion des produits (CRUD)
 - Création de produits
 - Modification de produits
 - Suppression de produits
-- Affichage de la liste des produits
-- Upload d’image produit (stockée dans `storage`)
+- Affichage du catalogue
+- Upload d’image produit (storage Laravel)
 
-### Catalogue (page d’accueil)
+---
+
+### 2. Catalogue (page d’accueil)
 - Affichage de tous les produits
 - Accès rapide aux actions :
   - Ajouter au panier
   - Modifier produit
   - Supprimer produit
-- Lien vers création de produit
+- Accès au panier
 
-### Panier (session)
-- Ajouter un produit au panier
-- Incrémenter la quantité si déjà existant
-- Afficher le contenu du panier
-- Supprimer un produit du panier
-- Calcul du total
+---
+
+### 3. Panier (session)
+- Ajout de produits au panier
+- Gestion des quantités
+- Suppression de produit du panier
+- Calcul automatique du total
+
+---
+
+### 4. Commandes (Orders)
+- Création automatique d’une commande lors du checkout
+- Stockage des informations client :
+  - Nom
+  - Email
+- Calcul du montant total
+- Statut de paiement (`payment_status`)
+- Stockage de l’identifiant transaction Fedapay
+
+---
+
+### 5. Détails commande (OrderItems)
+- Chaque produit du panier devient une ligne de commande
+- Stockage de :
+  - produit
+  - quantité
+  - prix unitaire
+
+---
+
+### 6. Paiement Fedapay (Sandbox)
+- Création de transaction via API Fedapay
+- Redirection vers page de paiement sandbox
+- Gestion des URLs :
+  - callback
+  - return success
+- Simulation de paiement complet
+
+---
+
+## Flux global de l’application
+
+```text
+Produits
+   ↓
+Panier (Session)
+   ↓
+Checkout
+   ↓
+Création Order + OrderItems
+   ↓
+Appel API Fedapay (Sandbox)
+   ↓
+Redirection vers paiement
+   ↓
+Validation paiement
+   ↓
+Page Success
+   ↓
+Retour catalogue
+````
 
 ---
 
 ## Base de données
 
 ### Table `products`
-- id
-- name
-- description
-- price
-- image
-- created_at
-- updated_at
+
+* id
+* name
+* description
+* price
+* image
+* created_at
+* updated_at
+
+---
 
 ### Table `orders`
-- id
-- customer_name
-- customer_email
-- total_amount
-- payment_status
-- transaction_id
-- created_at
-- updated_at
+
+* id
+* customer_name
+* customer_email
+* total_amount
+* payment_status
+* transaction_id
+* created_at
+* updated_at
+
+---
 
 ### Table `order_items`
-- id
-- order_id
-- product_id
-- quantity
-- price
-- created_at
-- updated_at
+
+* id
+* order_id
+* product_id
+* quantity
+* price
+* created_at
+* updated_at
 
 ---
 
 ## Relations Eloquent
 
-- Product → hasMany(OrderItem)
-- Order → hasMany(OrderItem)
-- OrderItem → belongsTo(Product)
-- OrderItem → belongsTo(Order)
+* Product → hasMany(OrderItem)
+* Order → hasMany(OrderItem)
+* OrderItem → belongsTo(Product)
+* OrderItem → belongsTo(Order)
+
+---
+
+## Installation
+
+```bash
+git clone <repo-url>
+cd project
+composer install
+cp .env.example .env
+php artisan key:generate
+```
+
+Configurer SQLite dans `.env` :
+
+```env
+DB_CONNECTION=sqlite
+```
+
+Créer la base :
+
+```bash
+touch database/database.sqlite
+```
+
+Migrer + seed :
+
+```bash
+php artisan migrate:fresh --seed
+```
 
 ---
 
 ## Seeder
 
-Le projet contient un seeder permettant de générer automatiquement 10 produits de test :
+Le projet inclut un seeder générant 10 produits de test.
+
+---
+
+## Stockage images
+
+Lien symbolique obligatoire :
 
 ```bash
-php artisan db:seed
-````
-
-Ou :
-
-```bash
-php artisan migrate:fresh --seed
+php artisan storage:link
 ```
 
 ---
@@ -105,77 +208,70 @@ php artisan migrate:fresh --seed
 
 ### Produits
 
-* GET `/` → Liste des produits
-* GET `/products/create` → Formulaire création
-* POST `/products` → Enregistrer produit
-* GET `/products/{id}/edit` → Modifier produit
-* PUT `/products/{id}` → Update produit
-* DELETE `/products/{id}` → Supprimer produit
+* `/` → catalogue
+* `/products/create`
+* `/products/{id}/edit`
+* CRUD complet
+
+---
 
 ### Panier
 
-* GET `/cart` → Voir panier
-* GET `/cart/add/{id}` → Ajouter produit
-* GET `/cart/remove/{id}` → Retirer produit
+* `/cart`
+* `/cart/add/{id}`
+* `/cart/remove/{id}`
 
 ---
 
-## Stockage des images
+### Checkout & paiement
 
-Les images sont stockées dans :
-
-```
-storage/app/public/products
-```
-
-Lien symbolique requis :
-
-```bash
-php artisan storage:link
-```
+* `/checkout`
+* `/payment/success`
+* `/payment/callback`
 
 ---
 
-## Structure globale du projet
+## Paiement Fedapay
 
-```
-app/
- ├── Http/Controllers
- │    ├── ProductController
- │    ├── CartController
- │
- ├── Models
- │    ├── Product
- │    ├── Order
- │    ├── OrderItem
-```
+* Mode utilisé : sandbox
+* API utilisée : Fedapay REST API
+* Endpoint transaction :
+
+  ```
+  https://sandbox-api.fedapay.com/v1/transactions
+  ```
 
 ---
 
 ## Objectif pédagogique
 
-Ce projet sert de base pour :
+Ce projet permet de comprendre :
 
-* Comprendre Laravel CRUD
-* Gérer une session panier
-* Manipuler Eloquent relations
-* Préparer un système de paiement (future étape)
+* architecture e-commerce Laravel
+* gestion panier avec session
+* relations Eloquent (Order / OrderItem)
+* intégration API externe (Fedapay)
+* flux complet de paiement en ligne
+* séparation logique des responsabilités
 
 ---
 
-## Améliorations futures
+## Améliorations possibles
 
-* Système de paiement (Stripe / CinetPay / Fedapay)
 * Authentification utilisateur
 * Historique des commandes
 * Dashboard admin
-* Design UI amélioré (Bootstrap / Tailwind)
+* Statut de commande avancé
+* Webhook Fedapay pour validation automatique
+* UI moderne (Tailwind / Bootstrap)
+* Pagination produits
 
 ---
 
-## Auteur
+## Licence
 
-Projet développé dans un but pédagogique pour l’apprentissage de Laravel et des systèmes e-commerce simples.
+Projet académique / pédagogique.
 
 ```
+IFNTI
 ```
