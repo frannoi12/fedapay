@@ -21,7 +21,6 @@ class FedapayService
                 'amount'       => (int) $order->total_amount,
                 'currency'     => ['iso' => 'XOF'],
                 'callback_url' => url('/payment/callback'),
-                'return_url'   => url('/payment/success'),
                 'customer'     => [
                     'firstname' => $order->customer_name,
                     'email'     => $order->customer_email,
