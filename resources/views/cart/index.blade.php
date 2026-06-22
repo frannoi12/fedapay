@@ -18,4 +18,4 @@
 
 <h2>Total: {{ $total }}</h2>
 
-<a href="/checkout">Passer au paiement</a>
+<a href="/show-checkout">Passer au paiement</a>
