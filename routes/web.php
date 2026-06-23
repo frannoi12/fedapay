@@ -22,8 +22,6 @@ Route::get('/show-checkout', [PaymentController::class, 'showCheckout']);
 Route::post('/checkout', [PaymentController::class, 'checkout']);
 
 
-Route::get('/payment/callback', function () {
-    return redirect('/payment/success');
-});
+Route::get('/payment/callback', [PaymentController::class, 'callback']);
 
 Route::get('/payment/success', [PaymentController::class, 'success']);

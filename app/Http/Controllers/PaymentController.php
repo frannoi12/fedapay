@@ -72,13 +72,14 @@ class PaymentController extends Controller
 
     public function success(Request $request)
     {
-        return view('payment.success', ['message' => 'Votre paiement a été traité !']);
+        return view('payment.success');
     }
 
     public function callback(Request $request)
     {
         // dd($request);
         $transactionId = $request->input('id'); 
+        $statut = $request->input("status");
 
         if ($transactionId) {
             $order = Order::firstWhere('transaction_id', $transactionId);
@@ -86,16 +87,17 @@ class PaymentController extends Controller
             if ($order) {
                 $order->payment_status = true;
                 $order->save();
-
-                // return response()->json([
-                //     'status' => 'success',
-                //     'message' => 'Le statut du paiement a été mis à jour.'
-                // ], 200);
             }
         }
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Commande introuvable pour cette transaction.'
-        ], 404);
+        else{
+            return redirect("/");
+        }
+        if ($statut=='approved'){
+            return redirect('/payment/success');
+        }elseif($statut=="declined" or $statut == "pending"){
+            return redirect("/");
+        }elseif($statut=="canceled"){
+            return redirect("/");
+        }        
     }
 }
