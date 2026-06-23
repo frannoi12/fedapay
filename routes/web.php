@@ -1,16 +1,13 @@
 <?php
 
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PaiementController;
 use Illuminate\Support\Facades\Route;
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+Route::get('/', function () {
+    return view('paiement');
+});
 
-Route::get('/', [ProductController::class, 'index']);
 
-Route::resource('products', ProductController::class);
-Route::get('/cart', [CartController::class, 'index']);
-Route::get('/cart/add/{product}', [CartController::class, 'add']);
-Route::get('/cart/remove/{id}', [CartController::class, 'remove']);
+Route::post('/checkout', [PaiementController::class, 'checkout']);
+Route::get('/paiement/callback', [PaiementController::class, 'callback']);
+
